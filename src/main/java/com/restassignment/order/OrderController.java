@@ -30,11 +30,11 @@ public class OrderController {
         Status status = Status.valueOf((String) orderRequest.get("status"));
         Long employeeId = Long.valueOf(orderRequest.get("employee_id").toString());
 
-        // Retrieve the associated Employee based on the provided employee_id
+
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new EmployeeNotFoundException(employeeId));
 
-        // Create a new Order and associate it with the Employee
+
         Order newOrder = new Order(description, status);
         newOrder.setEmployee(employee);
 
