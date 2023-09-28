@@ -11,69 +11,52 @@ import java.util.List;
 @RestController
 public class EmployeeController {
 
-    @Autowired
-    private final EmployeeRepository employeeRepository;
-    @Autowired
-    private final OrderRepository orderRepository;
 
+//    private final EmployeeRepository employeeRepository;
+//    private final OrderRepository orderRepository;
 
-    public EmployeeController(EmployeeRepository employeeRepository, OrderRepository orderRepository) {
-        this.employeeRepository = employeeRepository;
-        this.orderRepository = orderRepository;
+    private final EmployeeService employeeService;
+
+    @Autowired
+    public EmployeeController(EmployeeService employeeService) {
+        this.employeeService = employeeService;
     }
 
     @GetMapping("/employees")
     public List<Employee> all() {
-        return employeeRepository.findAll();
+        return employeeService.getAllEmployees();
     }
+
 
     @PostMapping("/employees/new")
     public Employee newEmployee (@RequestBody Employee newEmployee) {
-        return employeeRepository.save(newEmployee);
+        return employeeService.createEmployee(newEmployee);
     }
 
     @GetMapping("/employees/{id}")
     public Employee getOneEmployee (@PathVariable Long id) {
-        return employeeRepository.findById(id)
-                .orElseThrow(() -> new EmployeeNotFoundException(id));
+        return employeeService.getEmployeeById(id);
     }
 
     @PutMapping("/employees/{id}")
     public Employee replaceEmployee(@RequestBody Employee newEmployee, @PathVariable Long id) {
-        return employeeRepository.findById(id)
-                .map(employee -> {
-                    employee.setName(newEmployee.getName());
-                    employee.setRole(newEmployee.getRole());
-                    return employeeRepository.save(employee);
-                }).orElseGet(() -> {
-                    newEmployee.setId(id);
-                    return employeeRepository.save(newEmployee);
-                });
+        return employeeService.updateEmployee(id, newEmployee);
     }
 
     @DeleteMapping("/employees/{id}")
     void deleteEmployee(@PathVariable Long id) {
-        employeeRepository.deleteById(id);
+        employeeService.deleteEmployee(id);
     }
 
     @GetMapping("/employees/{employeeId}/orders")
     public List<Order> getOrdersForEmployee(@PathVariable Long employeeId) {
-        Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new EmployeeNotFoundException(employeeId));
-
-        return orderRepository.findByEmployee(employee);
+        return employeeService.getOrdersForEmployee(employeeId);
     }
 
     @GetMapping("/employees/{employeeId}/totalOrders")
     public long getTotalOrdersForEmployee(@PathVariable Long employeeId) {
-        Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new EmployeeNotFoundException(employeeId));
-
-        List<Order> orders = orderRepository.findByEmployee(employee);
-
-        long totalOrders = orders.size();
-
-        return totalOrders;
+        return employeeService.getTotalOrdersForEmployee(employeeId);
     }
+
 
 }
